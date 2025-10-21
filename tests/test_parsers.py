@@ -17,7 +17,6 @@ CATEGORY_HTML = """
       <a href="/en/catalog/toyota,2010,camry,2.5l+l4,2020,brake+pad">Brake Pads</a>
       <a href="/en/catalog/toyota,2010,camry,2.5l+l4,2021,rotor">Brake Rotors</a>
       <a href="/en/catalog/toyota,2010,camry,2.5l+l4&pt=2020">Duplicate Example</a>
-      <a href="/help/">Help Pages</a>
     </div>
   </body>
 </html>

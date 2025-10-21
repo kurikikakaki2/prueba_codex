@@ -26,19 +26,6 @@ def _normalise_text(text: Optional[str]) -> Optional[str]:
     return cleaned or None
 
 
-def _is_catalog_link(url: str) -> bool:
-    """Return True when the URL points to a RockAuto catalog resource."""
-
-    parsed = urlparse(url)
-    if "/catalog/" in parsed.path:
-        return True
-    query = parse_qs(parsed.query)
-    for key in ("pt", "parttype", "partType", "category"):
-        if key in query:
-            return True
-    return False
-
-
 def _extract_category_id_from_url(url: str) -> Optional[str]:
     parsed = urlparse(url)
     query = parse_qs(parsed.query)
@@ -82,8 +69,6 @@ class _CategoryHTMLParser(HTMLParser):
         if not href:
             return
         full_url = urljoin(self.base_url, href)
-        if not _is_catalog_link(full_url):
-            return
         identifier = _extract_category_id_from_url(full_url)
         if not identifier:
             return
