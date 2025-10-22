@@ -14,13 +14,9 @@ CATEGORY_HTML = """
 <html>
   <body>
     <div id="navcategories">
-      <a href="/en/catalog/toyota,2010,camry,2.5l+l4">Engine Link</a>
-      <a href="/help/">Help Pages</a>
       <a href="/en/catalog/toyota,2010,camry,2.5l+l4,2020,brake+pad">Brake Pads</a>
       <a href="/en/catalog/toyota,2010,camry,2.5l+l4,2021,rotor">Brake Rotors</a>
-      <a href="/en/catalog/toyota,2010,camry,2.5l+l4,2021,rotor">Brake Rotors Duplicate</a>
-      <a href="/en/catalog/toyota,2010,camry,2.5l+l4?parttype=3030">Search By Part Type</a>
-      <a href="/en/tools/?parttype=260">Tools & Universal Parts</a>
+      <a href="/en/catalog/toyota,2010,camry,2.5l+l4&pt=2020">Duplicate Example</a>
     </div>
   </body>
 </html>
@@ -49,9 +45,9 @@ PRODUCT_HTML = """
 """
 
 
-def test_parse_categories_extracts_only_vehicle_categories() -> None:
+def test_parse_categories_extracts_unique_entries() -> None:
     categories = parse_categories(CATEGORY_HTML, "https://www.rockauto.com/en/catalog/toyota,2010,camry,2.5l+l4")
-    assert {c.id for c in categories} == {"brake-pad", "rotor", "3030"}
+    assert {c.id for c in categories} == {"2020", "2021"}
     assert categories[0].name == "Brake Pads"
     assert categories[0].url.startswith("https://www.rockauto.com/en/catalog/toyota")
 

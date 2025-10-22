@@ -26,59 +26,22 @@ def _normalise_text(text: Optional[str]) -> Optional[str]:
     return cleaned or None
 
 
-_PARTTYPE_KEYS = ("pt", "parttype", "partType", "category")
-
-
-def _is_catalog_link(url: str) -> bool:
-    """Return True when the URL points to a RockAuto catalog resource."""
-
-    parsed = urlparse(url)
-    if "/catalog/" in parsed.path:
-        return True
-    query = parse_qs(parsed.query)
-    for key in _PARTTYPE_KEYS:
-        if key in query:
-            return True
-    return False
-
-
-def _is_category_link(url: str) -> bool:
-    """Return True when the URL looks like a vehicle-specific category entry."""
-
-    if not _is_catalog_link(url):
-        return False
-
-    parsed = urlparse(url)
-    path = parsed.path
-    if "/catalog/" not in path:
-        return False
-
-    query = parse_qs(parsed.query)
-    if any(query.get(key) for key in _PARTTYPE_KEYS):
-        return True
-
-    _, tail = path.split("/catalog/", 1)
-    segments = [segment for segment in tail.split(",") if segment]
-    # Vehicle categories add an extra comma-delimited segment past the engine id.
-    return len(segments) >= 6
-
-
 def _extract_category_id_from_url(url: str) -> Optional[str]:
     parsed = urlparse(url)
     query = parse_qs(parsed.query)
-    for key in _PARTTYPE_KEYS:
+    for key in ("pt", "parttype", "partType", "category"):
         value = query.get(key)
         if value:
             return value[0]
 
     path_without_slash = parsed.path.rstrip("/")
-    if "/catalog/" in path_without_slash:
-        path_without_slash = path_without_slash.split("/catalog/", 1)[1]
-    segments = [segment for segment in path_without_slash.split(",") if segment]
-    if not segments:
+    segments = path_without_slash.split(",") if "," in path_without_slash else path_without_slash.split("/")
+    segments = [segment for segment in segments if segment]
+    last_segment = segments[-1].strip() if segments else ""
+    if last_segment and re.search(r"\d", last_segment) is None and len(segments) >= 2:
+        last_segment = segments[-2].strip()
+    if not last_segment:
         return None
-
-    last_segment = segments[-1].strip()
     if not last_segment:
         return None
 
@@ -106,8 +69,6 @@ class _CategoryHTMLParser(HTMLParser):
         if not href:
             return
         full_url = urljoin(self.base_url, href)
-        if not _is_category_link(full_url):
-            return
         identifier = _extract_category_id_from_url(full_url)
         if not identifier:
             return
